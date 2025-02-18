@@ -1,3 +1,4 @@
+
 # Compiler and flags
 CXX = g++
 CXXFLAGS = -Wall -std=c++17
@@ -5,29 +6,39 @@ CXXFLAGS = -Wall -std=c++17
 # RAYLIB = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 RAYLIB = -lraylib -lm -ldl -lpthread -lGL
 
+SRC_DIR   =
+BUILD_DIR =bin
 
+# every build target must depend on this
+$(BUILD_DIR):
+	@mkdir -p $(BUILD_DIR)
 
 # Finds if user went "make $build run"
 # if it dead, BIN == "$build" value
 GOALS := $(filter-out run, $(MAKECMDGOALS))
 
-ifeq ($(strip $(GOALS)),)
+ifeq ($(strip $(GOALS)), )
    BIN := default
 else
    BIN := $(firstword $(GOALS))
 endif
 
+%: %.cpp $(BUILD_DIR) 
+	@echo "Removing older binary"
+	@rm -rf $(BUILD_DIR)/$@
 
-%: %.cpp
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(RAYLIB)
+	$(CXX) $(CXXFLAGS) -o $(BUILD_DIR)/$@ $@.cpp $(RAYLIB)
+
 
 .PHONY: run
 run: 
-	./$(BIN)
+	$(BUILD_DIR)/$(BIN)
 
-win:
-	gcc basicw.c -o example.exe -lraylib -lglfw3 -lopengl32 -lgdi32
+.PHONY: clean
+clean: 
+	@ls $(BUILD_DIR)
 
-basic_window:
-	gcc basicw.c -o example -lraylib -lm -ldl -lpthread -lGL
+#win:
+#	gcc basicw.c -o example.exe -lraylib -lglfw3 -lopengl32 -lgdi32
+
 
